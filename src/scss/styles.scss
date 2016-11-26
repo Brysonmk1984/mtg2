@@ -1,0 +1,57 @@
+body{
+    background-color:#242424;
+    margin:0px;
+    padding:0px;
+    font-family:helvetica, arial, "sans-serif";
+}
+header{
+    background-color:black;
+    height:98px;
+    width:100%;
+    position:relative;
+    overflow:hidden;
+    #circle{
+        width:70px;
+        height:70px;
+        background:white;
+        border-radius:50%;
+        float:left;
+        display:none;
+    }
+    
+    #innerBar{
+        height:42px;
+        width:100%;
+        margin-top:29px;
+        background-color: #454545;
+    }
+    #logo{
+        background-image:url("http://mtgcardster.com/images/cardsterLogo.png");
+        width:260px;
+        height:98px;
+        z-index:1000;
+        position:absolute;
+    }
+}
+#cardContainer{
+    
+}
+.card{
+    width:150px;
+    height:209px;
+    position:relative;
+    display:inline-block;
+    vertical-align:top;
+    border-radius:14px;
+    border: solid 1px black;
+    color:white;
+    background-color:gray;
+}
+
+footer{
+   height:400px;
+   width:100%;
+   position:flex;
+   align-items:flex-end;
+   background-color:black;
+}
