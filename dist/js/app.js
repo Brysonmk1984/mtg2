@@ -60,7 +60,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	__webpack_require__(188);
+	__webpack_require__(189);
 
 	_reactDom2.default.render(_react2.default.createElement(_Layout2.default, null), document.getElementById("app"));
 
@@ -21775,11 +21775,11 @@
 
 	var _Header2 = _interopRequireDefault(_Header);
 
-	var _CardContainer = __webpack_require__(185);
+	var _CardContainer = __webpack_require__(186);
 
 	var _CardContainer2 = _interopRequireDefault(_CardContainer);
 
-	var _Footer = __webpack_require__(187);
+	var _Footer = __webpack_require__(188);
 
 	var _Footer2 = _interopRequireDefault(_Footer);
 
@@ -21791,6 +21791,8 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	var DEFAULTS = { set: "KLD" };
+
 	var Layout = function (_React$Component) {
 	    _inherits(Layout, _React$Component);
 
@@ -21800,64 +21802,31 @@
 	        var _this = _possibleConstructorReturn(this, (Layout.__proto__ || Object.getPrototypeOf(Layout)).call(this));
 
 	        _this.state = {
-	            data: [],
-	            dataPageNum: 0,
-	            appPageInfo: { pageCount: 0, currentPage: 0, pagesArray: [[]] }
+	            sets: [{}],
+	            cards: []
 	        };
 	        return _this;
 	    }
 
 	    _createClass(Layout, [{
-	        key: 'createPages',
-	        value: function createPages() {
-	            var CARDSPERPAGE = 50;
-	            var dataLength = this.state.data.length,
-	                pageCount = Math.ceil(dataLength / CARDSPERPAGE),
-	                pagesArray = [];
-
-	            for (var i = 0; i < pageCount; i++) {
-	                pagesArray.push(this.state.data.splice(0, CARDSPERPAGE));
-	            }
-
-	            this.setState({
-	                appPageInfo: {
-	                    pageCount: pageCount,
-	                    currentPage: 0,
-	                    pagesArray: pagesArray
-	                }
-	            });
-
-	            console.log(this.state);
-	        }
-	    }, {
 	        key: 'fetch',
-	        value: function fetch() {
+	        value: function fetch(config) {
+
 	            var that = this;
 	            var request = new XMLHttpRequest();
-	            request.open('GET', 'https://api.magicthegathering.io/v1/cards?set=KLD', true);
+	            request.open('GET', config.endpoint, true);
 
 	            request.onload = function () {
 	                if (request.status >= 200 && request.status < 400) {
-	                    // Success!
 	                    var data = JSON.parse(request.responseText);
-
-	                    console.log(data);
-	                    that.setState({
-	                        data: data.cards
-	                    });
-
-	                    that.createPages();
+	                    config.resolve(data);
 	                } else {
-	                    // We reached our target server, but it returned an error
-	                    console.log('error');
+	                    console.log('Reached Server, but it returned an error');
 	                }
 	            };
-
 	            request.onerror = function () {
-	                // There was a connection error of some sort
 	                console.log("Connection Error");
 	            };
-
 	            request.send();
 	        }
 	    }, {
@@ -21865,9 +21834,45 @@
 	        value: function componentDidMount() {
 	            var _this2 = this;
 
-	            setTimeout(function () {
-	                _this2.fetch();
-	            }, 2000);
+	            /*
+	            1. Fetch Sets
+	            2. Fetch cards from latest set
+	            */
+	            var initGetSets = new Promise( /* executor */function (resolve, reject) {
+	                _this2.fetch({ endpoint: "https://api.deckbrew.com/mtg/sets", resolve: resolve, reject: reject });
+	            }).then(function (data) {
+	                _this2.setState({ sets: data });
+	                var initGetCards = new Promise( /* executor */function (resolve, reject) {
+	                    _this2.fetch({ endpoint: "https://api.deckbrew.com/mtg/cards?set=" + DEFAULTS.set, resolve: resolve, reject: reject });
+	                }).then(function (data) {
+	                    _this2.setState({ cards: data });
+	                });
+	            });
+	        }
+	    }, {
+	        key: 'getCards',
+	        value: function getCards(config) {
+	            var _this3 = this;
+
+	            console.log('in getCards');
+	            console.log('config', config);
+
+	            var endpoint = "https://api.deckbrew.com/mtg/cards?";
+
+	            endpoint += config.set ? "set=" + config.set : "";
+	            endpoint += config.set ? "&name=" + config.name : "";
+	            endpoint += config.rarity ? "&rarity=" + config.rarity : "";
+	            endpoint += config.color ? "&color=" + config.color : "";
+	            endpoint += config.type ? "&type=" + config.type : "";
+
+	            console.log("finishedENdpoint", endpoint);
+
+	            var getCards = new Promise(function (resolve, reject) {
+	                _this3.fetch({ endpoint: endpoint, resolve: resolve, reject: reject });
+	            }).then(function (data) {
+	                _this3.setState({ cards: data });
+	                console.log("STATE - ", _this3.state);
+	            });
 	        }
 	    }, {
 	        key: 'render',
@@ -21876,8 +21881,8 @@
 	            return _react2.default.createElement(
 	                'div',
 	                null,
-	                _react2.default.createElement(_Header2.default, null),
-	                _react2.default.createElement(_CardContainer2.default, { pageData: this.state.appPageInfo.pagesArray[this.state.appPageInfo.currentPage] }),
+	                _react2.default.createElement(_Header2.default, { sets: this.state.sets, getCards: this.getCards.bind(this) }),
+	                _react2.default.createElement(_CardContainer2.default, { cards: this.state.cards }),
 	                _react2.default.createElement(_Footer2.default, null)
 	            );
 	        }
@@ -21890,6 +21895,63 @@
 
 /***/ },
 /* 184 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Controls = __webpack_require__(185);
+
+	var _Controls2 = _interopRequireDefault(_Controls);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Header = function (_React$Component) {
+	    _inherits(Header, _React$Component);
+
+	    function Header() {
+	        _classCallCheck(this, Header);
+
+	        return _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).apply(this, arguments));
+	    }
+
+	    _createClass(Header, [{
+	        key: 'render',
+	        value: function render() {
+
+	            /*this.props.getCards();*/
+
+	            return _react2.default.createElement(
+	                'header',
+	                null,
+	                _react2.default.createElement('div', { id: 'logo' }),
+	                _react2.default.createElement(_Controls2.default, { sets: this.props.sets, getCards: this.props.getCards })
+	            );
+	        }
+	    }]);
+
+	    return Header;
+	}(_react2.default.Component);
+
+	exports.default = Header;
+
+/***/ },
+/* 185 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -21912,36 +21974,196 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Header = function (_React$Component) {
-	    _inherits(Header, _React$Component);
+	var Controls = function (_React$Component) {
+	    _inherits(Controls, _React$Component);
 
-	    function Header() {
-	        _classCallCheck(this, Header);
+	    function Controls(props) {
+	        _classCallCheck(this, Controls);
 
-	        return _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).apply(this, arguments));
+	        var _this = _possibleConstructorReturn(this, (Controls.__proto__ || Object.getPrototypeOf(Controls)).call(this, props));
+
+	        _this.state = { "set": "", type: "", rarity: "", color: "", name: "" };
+	        return _this;
 	    }
 
-	    _createClass(Header, [{
+	    _createClass(Controls, [{
+	        key: "handleSetChange",
+	        value: function handleSetChange(event) {
+	            this.setState({ set: event.target.value });
+	            /* Since settings state is not synchronous, can't use the state value for set here */
+	            this.props.getCards({ "set": event.target.value, name: this.state.name, type: this.state.type, rarity: this.state.rarity, color: this.state.color });
+	        }
+	    }, {
+	        key: "handleNameChange",
+	        value: function handleNameChange(event) {
+	            this.setState({ name: event.target.value });
+	            /* Since settings state is not synchronous, can't use the state value for set here */
+	            //this.props.getCards({"set" : this.state.set, name : event.target.value, type : this.state.type, rarity : this.state.rarity, color : this.state.color});
+	        }
+	    }, {
+	        key: "handleTypeChange",
+	        value: function handleTypeChange(event) {
+	            this.setState({ type: event.target.value });
+	            this.props.getCards({ "set": this.state.set, name: this.state.name, type: event.target.value, rarity: this.state.rarity, color: this.state.color });
+	        }
+	    }, {
+	        key: "handleRarityChange",
+	        value: function handleRarityChange(event) {
+	            this.setState({ rarity: event.target.value });
+	            this.props.getCards({ "set": this.state.set, name: this.state.name, type: this.state.type, rarity: event.target.value, color: this.state.color });
+	        }
+	    }, {
+	        key: "handleColorChange",
+	        value: function handleColorChange(event) {
+	            this.setState({ color: event.target.value });
+	            this.props.getCards({ "set": this.state.set, name: this.state.name, type: this.state.type, rarity: this.state.rarity, color: event.target.value });
+	        }
+	    }, {
 	        key: "render",
 	        value: function render() {
 
+	            var setOptionNodes = this.props.sets.map(function (set, index) {
+
+	                return _react2.default.createElement(
+	                    "option",
+	                    { key: index, value: set.id, id: "option-" + set.id },
+	                    set.name
+	                );
+	            });
+
 	            return _react2.default.createElement(
-	                "header",
-	                null,
-	                _react2.default.createElement("div", { id: "logo" }),
-	                _react2.default.createElement("div", { id: "circle" }),
-	                _react2.default.createElement("div", { id: "innerBar" })
+	                "div",
+	                { id: "controlsContainer" },
+	                _react2.default.createElement("input", { placeholder: "Search for card", value: "", type: "text " }),
+	                _react2.default.createElement(
+	                    "select",
+	                    { value: this.state.set, id: "sets", onChange: this.handleSetChange.bind(this) },
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "" },
+	                        "Sets"
+	                    ),
+	                    setOptionNodes.sort()
+	                ),
+	                _react2.default.createElement("input", { placeholder: "Filter By Name", value: this.state.name, type: "text", onChange: this.handleNameChange.bind(this) }),
+	                _react2.default.createElement(
+	                    "select",
+	                    { value: this.state.type, id: "type", onChange: this.handleTypeChange.bind(this) },
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "" },
+	                        "Type"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "artifact" },
+	                        "Artifact"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "creature" },
+	                        "Creature"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "enchantment" },
+	                        "Enchantment"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "instant" },
+	                        "Instant"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "land" },
+	                        "Land"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "planeswalker" },
+	                        "Planeswalker"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "sorcery" },
+	                        "Sorcery"
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    "select",
+	                    { value: this.state.rarity, id: "Card Rarity", onChange: this.handleRarityChange.bind(this) },
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "" },
+	                        "Rarity"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "common" },
+	                        "Common"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "uncommon" },
+	                        "Uncommon"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "rare" },
+	                        "Rare"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "mythic" },
+	                        "Mythic Rare"
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    "select",
+	                    { value: this.state.color, id: "Color", onChange: this.handleColorChange.bind(this) },
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "" },
+	                        "Colors"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "black" },
+	                        "Black"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "blue" },
+	                        "Blue"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "green" },
+	                        "Green"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "red" },
+	                        "Red"
+	                    ),
+	                    _react2.default.createElement(
+	                        "option",
+	                        { value: "white" },
+	                        "White"
+	                    )
+	                )
 	            );
 	        }
 	    }]);
 
-	    return Header;
+	    return Controls;
 	}(_react2.default.Component);
 
-	exports.default = Header;
+	exports.default = Controls;
 
 /***/ },
-/* 185 */
+/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21956,7 +22178,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Card = __webpack_require__(186);
+	var _Card = __webpack_require__(187);
 
 	var _Card2 = _interopRequireDefault(_Card);
 
@@ -21980,8 +22202,8 @@
 	    _createClass(CardContainer, [{
 	        key: 'render',
 	        value: function render() {
-	            var currentPageCardArray = this.props.pageData.map(function (card) {
-	                return _react2.default.createElement(_Card2.default, { key: card.number, name: card.name });
+	            var cardsArray = this.props.cards.map(function (card, index) {
+	                return _react2.default.createElement(_Card2.default, { key: index, card: card });
 	            });
 
 	            return _react2.default.createElement(
@@ -21990,7 +22212,7 @@
 	                _react2.default.createElement(
 	                    'ul',
 	                    null,
-	                    currentPageCardArray
+	                    cardsArray
 	                )
 	            );
 	        }
@@ -22002,7 +22224,7 @@
 	exports.default = CardContainer;
 
 /***/ },
-/* 186 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -22037,11 +22259,12 @@
 	    _createClass(Card, [{
 	        key: "render",
 	        value: function render() {
-
+	            var multiverseId = this.props.card.editions[0].multiverse_id,
+	                src = "http://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=" + multiverseId;
 	            return _react2.default.createElement(
 	                "li",
 	                { className: "card" },
-	                this.props.name
+	                this.props.card.name
 	            );
 	        }
 	    }]);
@@ -22052,7 +22275,7 @@
 	exports.default = Card;
 
 /***/ },
-/* 187 */
+/* 188 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22102,16 +22325,16 @@
 	exports.default = Footer;
 
 /***/ },
-/* 188 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(189);
+	var content = __webpack_require__(190);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(191)(content, {});
+	var update = __webpack_require__(192)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -22128,21 +22351,21 @@
 	}
 
 /***/ },
-/* 189 */
+/* 190 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(190)();
+	exports = module.exports = __webpack_require__(191)();
 	// imports
 
 
 	// module
-	exports.push([module.id, "body {\n  background-color: #242424;\n  margin: 0px;\n  padding: 0px;\n  font-family: helvetica, arial, \"sans-serif\"; }\n\nheader {\n  background-color: black;\n  height: 98px;\n  width: 100%;\n  position: relative;\n  overflow: hidden; }\n  header #circle {\n    width: 70px;\n    height: 70px;\n    background: white;\n    border-radius: 50%;\n    float: left;\n    display: none; }\n  header #innerBar {\n    height: 42px;\n    width: 100%;\n    margin-top: 29px;\n    background-color: #454545; }\n  header #logo {\n    background-image: url(\"http://mtgcardster.com/images/cardsterLogo.png\");\n    width: 260px;\n    height: 98px;\n    z-index: 1000;\n    position: absolute; }\n\n.card {\n  width: 150px;\n  height: 209px;\n  position: relative;\n  display: inline-block;\n  vertical-align: top;\n  border-radius: 14px;\n  border: solid 1px black;\n  color: white;\n  background-color: gray; }\n\nfooter {\n  height: 400px;\n  width: 100%;\n  position: flex;\n  align-items: flex-end;\n  background-color: black; }\n", ""]);
+	exports.push([module.id, "body {\n  background-color: #242424;\n  margin: 0px;\n  padding: 0px;\n  font-family: helvetica, arial, \"sans-serif\"; }\n\nheader {\n  background-color: black;\n  height: 98px;\n  width: 100%;\n  position: relative;\n  overflow: hidden; }\n  header #controlsContainer {\n    display: flex;\n    justify-content: flex-end; }\n    header #controlsContainer #sets {\n      width: 100px; }\n  header #circle {\n    width: 70px;\n    height: 70px;\n    background: white;\n    border-radius: 50%;\n    float: left;\n    display: none; }\n  header #innerBar {\n    height: 42px;\n    width: 100%;\n    margin-top: 29px;\n    background-color: #454545; }\n  header #logo {\n    background-image: url(\"http://mtgcardster.com/images/cardsterLogo.png\");\n    width: 260px;\n    height: 98px;\n    z-index: 1000;\n    position: absolute; }\n\n.card {\n  width: 150px;\n  height: 209px;\n  position: relative;\n  display: inline-block;\n  vertical-align: top;\n  border-radius: 14px;\n  border: solid 1px black;\n  color: white;\n  background-color: gray; }\n\nfooter {\n  height: 400px;\n  width: 100%;\n  display: flex;\n  align-items: flex-end;\n  background-color: black; }\n", ""]);
 
 	// exports
 
 
 /***/ },
-/* 190 */
+/* 191 */
 /***/ function(module, exports) {
 
 	/*
@@ -22198,7 +22421,7 @@
 
 
 /***/ },
-/* 191 */
+/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*

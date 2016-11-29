@@ -10,6 +10,13 @@ header{
     width:100%;
     position:relative;
     overflow:hidden;
+    #controlsContainer{
+        display:flex;
+        justify-content:flex-end;
+        #sets{
+            width:100px;
+        }
+    }
     #circle{
         width:70px;
         height:70px;
@@ -51,7 +58,7 @@ header{
 footer{
    height:400px;
    width:100%;
-   position:flex;
+   display:flex;
    align-items:flex-end;
    background-color:black;
 }

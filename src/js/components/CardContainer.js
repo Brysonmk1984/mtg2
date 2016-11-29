@@ -9,8 +9,8 @@ export default class CardContainer extends React.Component{
    
     
     render(){
-        let currentPageCardArray = this.props.pageData.map(card=>{
-            return <Card key={card.number} name={card.name} />;
+        let cardsArray = this.props.cards.map((card, index)=>{
+            return <Card key={index} card={card} />;
         });
         
         
@@ -19,7 +19,7 @@ export default class CardContainer extends React.Component{
         return (
             <div id="cardContainer">
                 <ul>
-                    {currentPageCardArray}
+                    {cardsArray}
                 </ul>
             </div>
         );

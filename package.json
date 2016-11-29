@@ -21,5 +21,8 @@
     "webpack-dev-server": "^1.16.2"
   },
   "author": "Bryson Kruk",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "mtgsdk": "^0.1.1"
+  }
 }
