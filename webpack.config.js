@@ -1,9 +1,11 @@
 module.exports = {
     entry: "./src/js/app.js",
     output: {
-        path: process.env.NODE_ENV === 'production' ? __dirname + '/prod' : __dirname + "/dist/js",
-        publicPath: __dirname + "/src/js",
-        filename: "app.js"
+        path: __dirname + "/dist/",
+
+        publicPath: '/dist/',
+
+        filename: "js/app.bundle.js"
     },
     module: {
         loaders: [{

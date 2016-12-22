@@ -11,7 +11,7 @@ export default class Header extends React.Component{
         
         return(
             <header>
-                <div id="logo"></div>
+                <div id="logo"></div>asd
                 <Controls sets={this.props.sets} getCards={this.props.getCards} />
             </header>
         );

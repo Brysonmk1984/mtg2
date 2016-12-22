@@ -13,7 +13,7 @@ export default class CardContainer extends React.Component{
             return <Card key={index} card={card} />;
         });
         
-        
+        console.log("bryson Ia");
         
         
         return (
