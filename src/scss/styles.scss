@@ -4,6 +4,9 @@ body{
     padding:0px;
     font-family:helvetica, arial, "sans-serif";
 }
+#app{
+    
+}
 header{
     background-color:black;
     height:98px;
@@ -41,7 +44,11 @@ header{
     }
 }
 #cardContainer{
-    
+    margin:20px;
+    ul{
+        text-align:center;
+        padding:0px;
+    } 
 }
 .card{
     width:150px;
@@ -53,12 +60,141 @@ header{
     border: solid 1px black;
     color:white;
     background-color:gray;
-}
+    
 
+    img{
+        width:150px;
+        height:209px;
+        &:hover{
+            width:200px;
+            height:auto;
+            position:absolute;
+            top:0px;
+            left:0px;
+            margin-left:-25px;
+            margin-top:-35px;
+            z-index:1000;
+            cursor:pointer;
+        }
+    }
+}
+.modal{
+    
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1050;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    outline: 0;
+
+    .modal_dialog{
+        width: 100%;
+        max-width: 700px;
+        top: 10%;
+        position:relative;
+    }
+
+    .modal_content{
+        position: relative;
+        background-color: #fff;
+        -webkit-background-clip: padding-box;
+        background-clip: padding-box;
+        border: 1px solid #999;
+        border: 1px solid rgba(0, 0, 0, .2);
+        border-radius: 6px;
+        outline: 0;
+        -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+        box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+    }
+
+    .modal_body {
+        min-height: 420px;
+        position: relative;
+        padding: 15px;
+    }
+    .close{
+        float: right;
+        font-size: 21px;
+        font-weight: bold;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
+        filter: alpha(opacity=20);
+        opacity: .2;
+        cursor:pointer;
+    }
+}
+.modal_backdrop{
+    background : white;
+    opacity:.5;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1049;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    outline: 0;
+}
+#cardModal{
+    #leftSideContainer{
+        width: 48%;
+        float: left;
+        #largeCardImageContainer{
+            height: 100%;
+            min-height: 309px;
+            min-width: 250px;
+            position: relative;
+            margin: 15px auto;
+        }
+        #largeCardImage{
+            left: 50%;
+            margin-left: -110px;
+            margin-top: -155px;
+            max-width: 223px;
+            position: absolute;
+            top: 50%;
+            width: 100%;
+        }
+    }
+    #extraInfoContainer{
+        width: 48%;
+        display: inline-block;
+        vertical-align: top;
+        padding: 10px;
+    }
+}
 footer{
    height:400px;
    width:100%;
    display:flex;
    align-items:flex-end;
    background-color:black;
+}
+
+@media (min-width: 768px){
+    #cardModal{
+        .modal_dialog {
+            margin: 30px auto;
+        }
+    }
+}
+
+/* Utility Classes */
+.hide{
+    display:none;
+}
+.well{
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
 }

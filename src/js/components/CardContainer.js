@@ -10,10 +10,10 @@ export default class CardContainer extends React.Component{
     
     render(){
         let cardsArray = this.props.cards.map((card, index)=>{
-            return <Card key={index} card={card} />;
+            return <Card key={index} card={card} loadModal={this.props.loadModal} />;
         });
         
-        console.log("bryson Ia");
+        console.log("bryson Ias");
         
         
         return (

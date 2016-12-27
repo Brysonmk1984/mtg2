@@ -2,6 +2,7 @@ import React from 'react';
 import Header from './Header';
 import CardContainer from './CardContainer';
 import Footer from './Footer';
+import Modal from './Modal';
 
 const DEFAULTS = {set : "KLD"};
 
@@ -11,7 +12,18 @@ export default class Layout extends React.Component{
         super();
         this.state = {
             sets : [{}],
-            cards : []
+            cards : [],
+            modal : {
+                visible : false,
+                content : {
+                    editions : [],
+                    types : [],
+                    subtypes : [],
+                    colors : "",
+                    power : "",
+                    toughness : ""
+                }
+            }
         };
     }
     
@@ -71,15 +83,55 @@ export default class Layout extends React.Component{
             console.log("STATE - ",this.state);
         });
     }
+
+    loadModal(config){
+        this.setState({
+            modal : {
+                visible:true,
+                content : config
+            }
+        });
+        
+    }
+
+    unloadModal(){
+        this.setState({
+            modal : {
+                visible:false,
+                content : {
+                    editions : [],
+                    types : [],
+                    subtypes : [],
+                    colors : "",
+                    power : "",
+                    toughness : ""
+                }
+            }
+        });
+    }
+
+    
     
     render(){
-       
-       
+        // Arrow key Functionality
+        function keyClick(e){
+           // escape click
+           if(e.keyCode == '27' && this.state.modal.visible){
+               this.unloadModal();
+           }
+        }
+        
+        document.onkeydown = keyClick.bind(this);
+        let containerClasses = this.state.modal.visible ? 'modal_backdrop' : '';
         return (
             <div>
+                
                 <Header sets={this.state.sets}  getCards={this.getCards.bind(this)}/>
-                <CardContainer cards={this.state.cards} />
+                <CardContainer cards={this.state.cards} loadModal={this.loadModal.bind(this)} />
                 <Footer />
+                <div className={containerClasses}></div>
+                <Modal modal={this.state.modal} unloadModal={this.unloadModal.bind(this)} />
+
             </div>
         );
     }
